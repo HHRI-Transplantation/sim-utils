@@ -1,3 +1,5 @@
+[![pre-commit.ci status](https://results.pre-commit.ci/badge/github/HHRI-Transplantation/sim-utils/main.svg)](https://results.pre-commit.ci/latest/github/HHRI-Transplantation/sim-utils/main)
+
 # sim-utils
 Utilities for conducting simulation studies.
 
