@@ -27,6 +27,16 @@ def abo_compatibility(
     )
 
 
+def age_at_listing() -> pl.Expr:
+
+    return (
+        pl.when(pl.col('CAN_AGE_IN_MONTHS_AT_LISTING') < pl.lit(18*12))
+        .then(pl.lit('Pediatric'))
+        .otherwise(pl.lit('Adult'))
+        .cast(pl.Enum(('Pediatric', 'Adult')))
+    )
+
+
 def collapse_abo(abo: pl.Expr) -> pl.Expr:
 
     return (

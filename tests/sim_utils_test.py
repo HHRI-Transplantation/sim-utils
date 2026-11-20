@@ -5,6 +5,7 @@ import pytest
 from polars.testing import assert_frame_equal
 
 from sim_utils import abo_compatibility
+from sim_utils import age_at_listing
 from sim_utils import collapse_abo
 from sim_utils import haversine_NM
 
@@ -202,3 +203,51 @@ def test_haversine_NM(polars_frame_function):
     )
 
     assert_frame_equal(frame, expected, rel_tol=0.01)
+
+
+@pytest.mark.parametrize(
+    'polars_frame_function',
+    (
+        pl.DataFrame,
+        pl.LazyFrame,
+    ),
+)
+def test_age_at_listing(polars_frame_function):
+
+    frame = polars_frame_function(
+        data={
+            'CAN_AGE_IN_MONTHS_AT_LISTING': [
+                12*0, 12*18 - 1, 12*18, 12*40, 12*72, None,
+            ],
+        },
+        schema={
+            'CAN_AGE_IN_MONTHS_AT_LISTING': pl.Int64,
+        },
+    )
+    expected = polars_frame_function(
+        data={
+            'CAN_AGE_IN_MONTHS_AT_LISTING': [
+                12*0,
+                12*18 - 1,
+                12*18,
+                12*40,
+                12*72,
+                None,
+            ],
+            'Age at Listing': [
+                'Pediatric',
+                'Pediatric',
+                'Adult',
+                'Adult',
+                'Adult',
+                'Adult',
+            ],
+        },
+        schema={
+            'CAN_AGE_IN_MONTHS_AT_LISTING': pl.Int64,
+            'Age at Listing': pl.Enum(('Pediatric', 'Adult')),
+        },
+    )
+
+    frame = frame.with_columns(age_at_listing().alias('Age at Listing'))
+    assert_frame_equal(frame, expected)
