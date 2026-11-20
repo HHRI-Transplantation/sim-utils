@@ -7,6 +7,26 @@ import polars as pl
 PolarsFrame = TypeVar('PolarsFrame', pl.DataFrame, pl.LazyFrame)
 
 
+def abo_compatibility(
+    can_abo: pl.Expr,
+    don_abo: pl.Expr,
+) -> pl.Expr:
+
+    can_abo_clean = collapse_abo(can_abo)
+    don_abo_clean = collapse_abo(don_abo)
+
+    return (
+        pl.when(don_abo_clean == can_abo_clean)
+        .then(pl.lit('Identical'))
+        .when(don_abo_clean == pl.lit('O'))
+        .then(pl.lit('Compatible'))
+        .when(can_abo_clean == pl.lit('AB'))
+        .then(pl.lit('Compatible'))
+        .otherwise(pl.lit('Incompatible'))
+        .cast(pl.Enum(('Identical', 'Compatible', 'Incompatible')))
+    )
+
+
 def collapse_abo(abo: pl.Expr) -> pl.Expr:
 
     return (
